@@ -1,0 +1,88 @@
+# ==============================================================================
+# SeisNet-1D: Deep Learning Earthquake Detection & P/S Phase Picking on STEAD
+# Configuration Specification
+# ==============================================================================
+
+system:
+  seed: 42
+  device: "auto"          # "auto", "cuda", or "cpu"
+  num_workers: 0          # Set to 0 on Windows for rock-solid stability
+
+waveform:
+  sampling_rate: 100      # STEAD standard sampling rate in Hz (100 Hz)
+  duration_sec: 60        # 60 seconds duration
+  n_samples: 6000         # 6000 samples per channel (60s @ 100Hz)
+  channels: 3             # 3-channel seismograms: [E, N, Z]
+  channel_names: ["E", "N", "Z"]
+
+preprocessing:
+  detrend: true           # Remove linear trend and demean
+  filter_type: "bandpass" # SciPy Butterworth bandpass filter
+  f_min: 1.0              # Lower cutoff frequency in Hz
+  f_max: 45.0             # Upper cutoff frequency in Hz (Nyquist is 50 Hz)
+  filter_order: 4         # Filter order (zero-phase SOS filter)
+  eps: 1.0e-8             # Safeguard against division by zero on dead channels
+
+dataset:
+  mode: "demo"            # Default mode: "demo" (auto-generated chunk) or "stead" (data/raw)
+  sigma: 20               # Target Gaussian half-width in samples (0.2s @ 100Hz)
+  demo_traces: 1200       # Total demo traces: 800 earthquakes + 400 noise traces
+  train_split: 0.70       # 70% training
+  val_split: 0.15         # 15% validation
+  test_split: 0.15        # 15% test
+  split_group_key: "source_id" # Group key to prevent event/source data leakage
+
+paths:
+  demo_dir: "data/sample"
+  demo_hdf5: "data/sample/chunk_demo.hdf5"
+  demo_csv: "data/sample/chunk_demo.csv"
+  raw_dir: "data/raw"
+  raw_hdf5: "data/raw/chunk1.hdf5"
+  raw_csv: "data/raw/chunk1.csv"
+  model_dir: "models"
+  best_model: "models/best_model.pt"
+  latest_model: "models/latest_model.pt"
+  metrics_file: "models/metrics.json"
+  history_file: "models/history.json"
+  assets_dir: "assets"
+
+model:
+  in_channels: 3
+  encoder_channels: [32, 64, 128, 256]
+  downsample_factors: [4, 4, 5, 5]     # 6000 -> 1500 -> 375 -> 75 -> 15
+  bottleneck_channels: 256
+  bottleneck_dilations: [2, 4]
+  dropout: 0.3
+  phase_classes: 2                     # [P_curve, S_curve]
+
+loss:
+  detection_weight: 1.0   # Weight for event classification loss (BCEWithLogits)
+  p_phase_weight: 10.0    # Weight for P-wave Gaussian curve loss
+  s_phase_weight: 10.0    # Weight for S-wave Gaussian curve loss
+  focal_gamma: 2.0        # Focusing parameter for sparse Gaussian targets
+  focal_alpha: 0.75       # Balancing parameter for positive time steps
+
+training:
+  batch_size: 32
+  epochs: 25
+  learning_rate: 0.001
+  weight_decay: 1.0e-4
+  lr_scheduler: "cosine"  # "cosine" or "plateau"
+  min_lr: 1.0e-6
+  early_stopping_patience: 6
+  gradient_clip: 1.0
+
+evaluation:
+  detection_threshold: 0.50
+  pick_threshold: 0.30     # Threshold on predicted sigmoid probability to declare a phase pick
+  peak_distance: 50        # Minimum sample distance between detected peaks (0.5s)
+  tolerance_sec: [0.1, 0.2, 0.5] # Precision tolerances in seconds
+  velocity_estimate_km_s: 8.0    # Empirical S-P factor: d_epi ≈ (t_S - t_P) * 8.0 km/s
+
+seedlink:
+  default_server: "geofon.gfz.de:18000"
+  default_network: "IU"
+  default_station: "GRFO"
+  default_channels: "BH?"
+  alert_cooldown_sec: 15.0
+  target_sampling_rate: 100.0

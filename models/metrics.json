@@ -1,0 +1,68 @@
+{
+  "dataset_mode": "demo",
+  "checkpoint_epoch": 9,
+  "test_samples": 185,
+  "earthquake_count": 125,
+  "noise_count": 60,
+  "detection": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "confusion_matrix": {
+      "true_negative": 60,
+      "false_positive": 0,
+      "false_negative": 0,
+      "true_positive": 125
+    }
+  },
+  "phase_picking": {
+    "p_wave": {
+      "picks_evaluated": 125,
+      "mae_sec": 4.641760000000001,
+      "rmse_sec": 7.480993303031356,
+      "mean_bias_sec": 4.641760000000001,
+      "std_residual_sec": 5.866798522397032,
+      "tolerance_0.1s_pct": 19.2,
+      "tolerance_0.2s_pct": 21.6,
+      "tolerance_0.5s_pct": 37.6
+    },
+    "s_wave": {
+      "picks_evaluated": 125,
+      "mae_sec": 5.2484,
+      "rmse_sec": 6.365681298965571,
+      "mean_bias_sec": -3.13288,
+      "std_residual_sec": 5.541386225990749,
+      "tolerance_0.1s_pct": 0.0,
+      "tolerance_0.2s_pct": 0.0,
+      "tolerance_0.5s_pct": 0.8
+    },
+    "epicentral_distance": {
+      "events_evaluated": 59,
+      "mae_km": 49.20898305084746,
+      "velocity_factor_km_s": 8.0
+    },
+    "snr_breakdown": [
+      {
+        "bin": "Low SNR (< 12 dB)",
+        "count": 14,
+        "p_mae_sec": 11.345714285714285,
+        "s_mae_sec": 3.342142857142857
+      },
+      {
+        "bin": "Medium SNR (12 - 22 dB)",
+        "count": 47,
+        "p_mae_sec": 5.521276595744682,
+        "s_mae_sec": 4.719574468085107
+      },
+      {
+        "bin": "High SNR (>= 22 dB)",
+        "count": 64,
+        "p_mae_sec": 2.529375,
+        "s_mae_sec": 6.05375
+      }
+    ]
+  }
+}
